@@ -44,7 +44,7 @@ class _NewItemState extends State<NewItemScreen> {
                 },
               ),
               Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: TextFormField(
@@ -64,24 +64,27 @@ class _NewItemState extends State<NewItemScreen> {
                   ),
                   const SizedBox(width: Dimens.paddingMedium),
                   Expanded(
-                    child: DropdownButtonFormField(
-                      items: [
-                        for (final category in categories.entries)
-                          DropdownMenuItem(
-                            value: category.value,
-                            child: Row(
-                              children: [
-                                Container(
-                                    color: category.value.color,
-                                    height: Dimens.itemIconSizeMedium,
-                                    width: Dimens.itemIconSizeMedium),
-                                const SizedBox(width: Dimens.paddingMedium),
-                                Text(category.value.title)
-                              ],
-                            ),
-                          )
-                      ],
-                      onChanged: (value) {},
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: Dimens.padding),
+                      child: DropdownButtonFormField(
+                        items: [
+                          for (final category in categories.entries)
+                            DropdownMenuItem(
+                              value: category.value,
+                              child: Row(
+                                children: [
+                                  Container(
+                                      color: category.value.color,
+                                      height: Dimens.itemIconSizeMedium,
+                                      width: Dimens.itemIconSizeMedium),
+                                  const SizedBox(width: Dimens.paddingMedium),
+                                  Text(category.value.title)
+                                ],
+                              ),
+                            )
+                        ],
+                        onChanged: (value) {},
+                      ),
                     ),
                   )
                 ],
