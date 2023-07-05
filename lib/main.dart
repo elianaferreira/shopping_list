@@ -6,7 +6,7 @@ final theme = ThemeData.light(useMaterial3: true).copyWith(
     colorScheme: kColorScheme,
     appBarTheme: const AppBarTheme().copyWith(
       backgroundColor: kColorScheme.primary,
-      foregroundColor: kColorScheme.primaryContainer,
+      foregroundColor: kColorScheme.onPrimary,
     ));
 
 void main() {
