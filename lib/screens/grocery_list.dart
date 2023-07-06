@@ -23,43 +23,49 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
 
   void _loadItem() async {
     final url = Uri.https(Api.baseUrl, Api.urlPath);
-    final response = await http.get(url);
+    try {
+      final response = await http.get(url);
 
-    if (response.statusCode >= 400) {
-      // ignore: use_build_context_synchronously
-      if (!context.mounted) return;
-      setState(() {
-        _errorMessage = 'Failed to fetch the data. Please try again later.';
-      });
-      return;
-    }
+      if (response.statusCode >= 400) {
+        // ignore: use_build_context_synchronously
+        if (!context.mounted) return;
+        setState(() {
+          _errorMessage = 'Failed to fetch the data. Please try again later.';
+        });
+        return;
+      }
 
-    //specific for Firebase when is not data.
-    if (response.body == 'null') {
+      //specific for Firebase when is not data.
+      if (response.body == 'null') {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final Map<String, dynamic> listData = json.decode(response.body);
+      final List<GroceryItem> loadedItems = [];
+      for (final item in listData.entries) {
+        final category = categories.entries
+            .firstWhere((categoryItem) =>
+                categoryItem.value.title == item.value['category'])
+            .value;
+        loadedItems.add(GroceryItem(
+            id: item.key,
+            name: item.value['name'],
+            quantity: item.value['quantity'],
+            category: category));
+      }
+
       setState(() {
+        _groceryItems = loadedItems;
         _isLoading = false;
       });
-      return;
+    } catch (err) {
+      setState(() {
+        _errorMessage = 'Something went wrong! Please try again later.';
+      });
     }
-
-    final Map<String, dynamic> listData = json.decode(response.body);
-    final List<GroceryItem> loadedItems = [];
-    for (final item in listData.entries) {
-      final category = categories.entries
-          .firstWhere((categoryItem) =>
-              categoryItem.value.title == item.value['category'])
-          .value;
-      loadedItems.add(GroceryItem(
-          id: item.key,
-          name: item.value['name'],
-          quantity: item.value['quantity'],
-          category: category));
-    }
-
-    setState(() {
-      _groceryItems = loadedItems;
-      _isLoading = false;
-    });
   }
 
   @override
@@ -86,17 +92,29 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
       _groceryItems.remove(item);
     });
     final url = Uri.https(Api.baseUrl, Api.groceryItemPath(item.id));
-    final response = await http.delete(url);
-    if (response.statusCode >= 400) {
+
+    try {
+      final response = await http.delete(url);
+      if (response.statusCode >= 400) {
+        setState(() {
+          _groceryItems.insert(index, item);
+        });
+
+        // ignore: use_build_context_synchronously
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Error deleting the item.')));
+      }
+    } catch (err) {
       setState(() {
         _groceryItems.insert(index, item);
       });
-
       // ignore: use_build_context_synchronously
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error deleting the item.')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Something went wrong!')));
     }
   }
 

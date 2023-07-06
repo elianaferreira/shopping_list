@@ -32,26 +32,37 @@ class _NewItemState extends State<NewItemScreen> {
         _isSending = true;
       });
       final url = Uri.https(Api.baseUrl, Api.urlPath);
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(
-          {
-            'name': _enteredName,
-            'quantity': _enteredQuantity,
-            'category': _selectedCategory!.title,
-          },
-        ),
-      );
-      // ignore: use_build_context_synchronously
-      if (!context.mounted) return;
-      final Map<String, dynamic> resData = json.decode(response.body);
+      try {
+        final response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(
+            {
+              'name': _enteredName,
+              'quantity': _enteredQuantity,
+              'category': _selectedCategory!.title,
+            },
+          ),
+        );
+        // ignore: use_build_context_synchronously
+        if (!context.mounted) return;
+        final Map<String, dynamic> resData = json.decode(response.body);
 
-      Navigator.of(context).pop(GroceryItem(
-          id: resData['name'],
-          name: _enteredName,
-          quantity: _enteredQuantity,
-          category: _selectedCategory!));
+        Navigator.of(context).pop(GroceryItem(
+            id: resData['name'],
+            name: _enteredName,
+            quantity: _enteredQuantity,
+            category: _selectedCategory!));
+      } catch (err) {
+        setState(() {
+          _isSending = false;
+        });
+        // ignore: use_build_context_synchronously
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Something went wrong!')));
+      }
     }
   }
 
