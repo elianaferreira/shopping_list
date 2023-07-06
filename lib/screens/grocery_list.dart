@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/grocery_item.dart';
 import 'package:shopping_list/screens/new_item.dart';
-import 'package:shopping_list/utils/constants.dart';
+import 'package:shopping_list/utils/api.dart';
 import 'package:shopping_list/utils/dimens.dart';
 
 class GroceryListScreen extends StatefulWidget {
@@ -22,7 +22,7 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
   String? _errorMessage;
 
   void _loadItem() async {
-    final url = Uri.https(BASE_URL, URL_PATH);
+    final url = Uri.https(Api.baseUrl, Api.urlPath);
     final response = await http.get(url);
 
     if (response.statusCode >= 400) {
@@ -72,10 +72,24 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
     });
   }
 
-  void _removeItem(GroceryItem item) {
+  void _removeItem(GroceryItem item) async {
+    final index = _groceryItems.indexOf(item);
     setState(() {
       _groceryItems.remove(item);
     });
+    final url = Uri.https(Api.baseUrl, Api.groceryItemPath(item.id));
+    final response = await http.delete(url);
+    if (response.statusCode >= 400) {
+      setState(() {
+        _groceryItems.insert(index, item);
+      });
+
+      // ignore: use_build_context_synchronously
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error deleting the item.')));
+    }
   }
 
   @override

@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/categories.dart';
 import 'package:shopping_list/models/grocery_item.dart';
-import 'package:shopping_list/utils/constants.dart';
+import 'package:shopping_list/utils/api.dart';
 import 'package:shopping_list/utils/dimens.dart';
 
 class NewItemScreen extends StatefulWidget {
@@ -31,7 +31,7 @@ class _NewItemState extends State<NewItemScreen> {
       setState(() {
         _isSending = true;
       });
-      final url = Uri.https(BASE_URL, URL_PATH);
+      final url = Uri.https(Api.baseUrl, Api.urlPath);
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
