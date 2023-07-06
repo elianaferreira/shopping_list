@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/categories.dart';
-import 'package:shopping_list/models/grocery_item.dart';
+import 'package:shopping_list/utils/constants.dart';
 import 'package:shopping_list/utils/dimens.dart';
 
 class NewItemScreen extends StatefulWidget {
@@ -20,14 +23,24 @@ class _NewItemState extends State<NewItemScreen> {
   var _enteredQuantity = 1;
   var _selectedCategory = categories[Categories.vegetables];
 
-  void _saveItem() {
+  void _saveItem() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      Navigator.of(context).pop(GroceryItem(
-          id: DateTime.now().toString(),
-          name: _enteredName,
-          quantity: _enteredQuantity,
-          category: _selectedCategory!));
+      final url = Uri.https(BASE_URL, URL_PATH);
+      await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(
+          {
+            'name': _enteredName,
+            'quantity': _enteredQuantity,
+            'category': _selectedCategory!.title,
+          },
+        ),
+      );
+      // ignore: use_build_context_synchronously
+      if (!context.mounted) return;
+      Navigator.of(context).pop();
     }
   }
 
