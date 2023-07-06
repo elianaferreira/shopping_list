@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/categories.dart';
+import 'package:shopping_list/models/grocery_item.dart';
 import 'package:shopping_list/utils/constants.dart';
 import 'package:shopping_list/utils/dimens.dart';
 
@@ -27,7 +28,7 @@ class _NewItemState extends State<NewItemScreen> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       final url = Uri.https(BASE_URL, URL_PATH);
-      await http.post(
+      final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
         body: json.encode(
@@ -40,7 +41,13 @@ class _NewItemState extends State<NewItemScreen> {
       );
       // ignore: use_build_context_synchronously
       if (!context.mounted) return;
-      Navigator.of(context).pop();
+      final Map<String, dynamic> resData = json.decode(response.body);
+
+      Navigator.of(context).pop(GroceryItem(
+          id: resData['name'],
+          name: _enteredName,
+          quantity: _enteredQuantity,
+          category: _selectedCategory!));
     }
   }
 
