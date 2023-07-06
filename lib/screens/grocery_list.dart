@@ -19,10 +19,21 @@ class GroceryListScreen extends StatefulWidget {
 class _GroceryListScreenState extends State<GroceryListScreen> {
   List<GroceryItem> _groceryItems = [];
   var _isLoading = true;
+  String? _errorMessage;
 
   void _loadItem() async {
     final url = Uri.https(BASE_URL, URL_PATH);
     final response = await http.get(url);
+
+    if (response.statusCode >= 400) {
+      // ignore: use_build_context_synchronously
+      if (!context.mounted) return;
+      setState(() {
+        _errorMessage = 'Failed to fetch the data. Please try again later.';
+      });
+      return;
+    }
+
     final Map<String, dynamic> listData = json.decode(response.body);
     final List<GroceryItem> loadedItems = [];
     for (final item in listData.entries) {
@@ -76,6 +87,12 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
     if (_isLoading) {
       content = const Center(
         child: CircularProgressIndicator(),
+      );
+    }
+
+    if (_errorMessage != null) {
+      content = Center(
+        child: Text(_errorMessage!),
       );
     }
 
