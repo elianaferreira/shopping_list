@@ -18,6 +18,7 @@ class GroceryListScreen extends StatefulWidget {
 
 class _GroceryListScreenState extends State<GroceryListScreen> {
   List<GroceryItem> _groceryItems = [];
+  var _isLoading = true;
 
   void _loadItem() async {
     final url = Uri.https(BASE_URL, URL_PATH);
@@ -38,6 +39,7 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
 
     setState(() {
       _groceryItems = loadedItems;
+      _isLoading = false;
     });
   }
 
@@ -70,6 +72,12 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
     Widget content = const Center(
       child: Text('No items added yet!'),
     );
+
+    if (_isLoading) {
+      content = const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
 
     if (_groceryItems.isNotEmpty) {
       content = ListView.builder(
